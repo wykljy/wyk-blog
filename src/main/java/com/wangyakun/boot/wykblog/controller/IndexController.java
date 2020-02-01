@@ -1,6 +1,7 @@
 package com.wangyakun.boot.wykblog.controller;
 
 import com.wangyakun.boot.wykblog.constant.RespEnum;
+import com.wangyakun.boot.wykblog.model.vo.IndexPageVO;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
 import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
 import org.apache.log4j.Logger;
@@ -114,8 +115,22 @@ public class IndexController {
 
     @RequestMapping("/logout")
     public String logout(){
+        //shiro 登出
+        Subject subject=SecurityUtils.getSubject();
+        subject.logout();
         log.info("用户退出登录");
         return "login";
     }
+
+    @RequestMapping("getIndexPageData")
+    @ResponseBody
+    public ResponseWrapper getIndexPageData(){
+        IndexPageVO vo=new IndexPageVO();
+        vo.setArticleCount(87);
+        vo.setVipCount(298);
+        vo.setCommentCount(230);
+        return ResponseWrapperMapper.successByData(vo);
+    }
+
 
 }
