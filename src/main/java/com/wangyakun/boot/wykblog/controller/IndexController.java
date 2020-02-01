@@ -112,7 +112,9 @@ public class IndexController {
         return "403";
     }
 
+    @RequestMapping("/logout")
     public String logout(){
+        log.info("用户退出登录");
         return "login";
     }
 
