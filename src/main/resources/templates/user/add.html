@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>添加操作员</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assert/layui/css/layui.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/assert/css/admin.css}" />
+
+</head>
+
+<body>
+<fieldset class="layui-elem-field layui-field-title"
+          style="margin-top: 20px;">
+    <legend>添加用户</legend>
+</fieldset>
+<br/><form class="layui-form" action="" method="post"  >
+    <div class="layui-form-item">
+        <label class="layui-form-label">账号</label>
+        <div class="layui-input-inline">
+            <input type="text" name="username" lay-verify="required"  placeholder="请输入账号" autocomplete="off" id="username" class="layui-input"   >
+        </div>
+    </div>
+
+
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-inline">
+            <input type="password" name="password" lay-verify="pwd"  autocomplete="off" placeholder="请输入密码" class="layui-input" >
+            <input type="hidden" name="userImage"  autocomplete="off"  class="layui-input" id="userImage" >
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">别名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="name" lay-verify="realName"  autocomplete="off" placeholder="请输入别名" class="layui-input" >
+            <input type="hidden" name="type"  autocomplete="off"  class="layui-input" value="2" >
+        </div>
+    </div>
+
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">照片</label>
+        <div class="layui-input-inline uploadHeadImage">
+            <div class="layui-upload-drag" id="headImg">
+                <i class="layui-icon"></i>
+                <p>点击上传图片，或将图片拖拽到此处</p>
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <div class="layui-upload-list">
+                <img class="layui-upload-img headImage" src="http://t.cn/RCzsdCq" id="demo1">
+                <p id="demoText"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit="" lay-filter="addOperator">确定</button>
+        </div>
+    </div>
+</form>
+
+
+<script th:src="@{/assert/layui/layui.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/assert/js/common.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/assert/js/jquery-1.10.2.min.js}" type="text/javascript" charset="utf-8"></script>
+<script>
+    layui
+        .use(['form', 'jquery', 'layer','upload','element'], function() {
+            var $ = layui.jquery;
+            var upload=layui.upload;
+            var form=layui.form;
+            var element=layui.element;
+
+            //初始化数据
+            var url = window.location.href;
+            //获取参数
+            if(url.indexOf("?") != -1) {
+                $(function() {
+                    url = url.split("?");
+                    var userId = url[1].substr(1);
+                    userId = userId.split("=");
+                    $("#username").val(userId[1]);
+                })
+            }
+
+            var uploadInst = upload.render({
+                elem: '#headImg'
+                , url: 'uploadImage'
+                , size: 500
+                //上传前的回调
+                , before: function (obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function (index, file, result) {
+                        $('#demo1').attr('src', result); //图片链接（base64）
+                    });
+                }
+                //操作成功后的回调
+                , done: function (res) {
+                    //如果上传失败
+                    if (res.code > 0) {
+                        return layer.msg('上传失败');
+                    }
+                    //上传成功
+                    //打印后台传回的地址: 把地址放入一个隐藏的input中, 和表单一起提交到后台, 此处略..
+                    console.log(res.data);
+                    $("#userImage").val(res.data);
+                    var demoText = $('#demoText');
+                    demoText.html('<span style="color: #8f8f8f;">上传成功!</span>');
+                }
+                //上传错误的回调
+                , error: function () {
+                    //演示失败状态，并实现重传
+                    var demoText = $('#demoText');
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-mini demo-reload">重试</a>');
+                    demoText.find('.demo-reload').on('click', function () {
+                        uploadInst.upload();
+                    });
+                }
+            });
+            element.init();
+
+            //规则校验
+            var mobile = /^1[3|4|5|7|8|9]\d{9}$/;
+            var han = /^[\u4e00-\u9fa5]+$/;
+            var regIdNo = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+            form.verify({
+                tel: function (value) {
+                    var flag = mobile.test(value);
+                    if(!flag){
+                        return '请输入正确的手机号';
+                    }
+                },
+                realName:function (value) {
+                    var flag = han.test(value);
+                    if(!flag){
+                        return '姓名请输入汉字';
+                    }
+                },
+                pwd:function (value) {
+                    if(value.length < 6){
+                        return '密码长度不能小于6';
+                    }
+                },
+                idCardNo:function (value) {
+                    var flag = regIdNo.test(value);
+                    if(!flag){
+                        return '身份证格式有误';
+                    }
+                }
+            });
+
+            //添加操作员
+            form.on('submit(addOperator)', function(data){
+                var index= layer.load(1);
+                $.post('addUserImg',data.field,function(res){
+                    layer.close(index);
+                    var status=res.code;
+                    if(status == 0){
+                        layer.msg(res.msg, {icon: 6,time:1000,shade:0.3},function () {
+                            window.location.href="userList";
+                        });
+
+                    }else{
+                        layer.msg(res.msg, {icon: 5});
+                    }
+
+                })
+                return false;
+            });
+
+
+        });
+</script>
+
+</body>
+
+</html>

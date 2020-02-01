@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyakun.boot.wykblog.mapper.RoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.wangyakun.boot.wykblog.model.RoleModel" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+        <result column="role_des" property="roleDes" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" javaType="DATE"/>
+        <result column="role_flag" property="roleFlag" jdbcType="BOOLEAN" />
+    </resultMap>
+
+
+    <select id="getRoleListByUserId" resultMap="BaseResultMap">
+        select br.* from blog_user bu join blog_user_role bur  on bu.id=bur.user_id
+        join blog_role br on bur.role_id = br.id
+        where bu.id=#{userId}
+    </select>
+</mapper>

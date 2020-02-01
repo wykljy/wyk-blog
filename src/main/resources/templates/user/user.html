@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>用户管理</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/assert/layui/css/layui.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/assert/css/admin.css}"/>
+
+</head>
+<body>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<div class="layui-input-inline">
+    <a href="javascript:;" class="layui-btn layui-btn-sm" id="refresh">
+        <i class="layui-icon">&#xe669;</i> 刷新
+    </a>
+
+    <a href="javascript:;" class="layui-btn layui-btn-sm" id="addUser">
+        <i class="layui-icon">&#xe61f;</i> 添加用户
+    </a>
+
+    <a href="javascript:;" class="layui-btn layui-btn-sm" id="addUserImg">
+        <i class="layui-icon">&#xe654;</i> 添加用户(带照片)
+    </a>
+
+    <!--
+    <a href="javascript:;" class="layui-btn layui-btn-sm" id="addVipBatch">
+        <i class="layui-icon">&#xe681;</i> 批量导入
+    </a>-->
+
+
+</div>
+<table id="userList" lay-filter="userList"></table>
+<script th:src="@{/assert/layui/layui.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/assert/js/common.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/assert/js/jquery-1.10.2.min.js}" type="text/javascript" charset="utf-8"></script>
+<script>
+    layui
+        .use(['form', 'jquery', 'layer','table'], function() {
+            var $ = layui.jquery;
+            var table=layui.table;
+            var form=layui.form;
+            table.render({
+                elem: '#userList',
+                url : 'queryUserList',
+                cellMinWidth :95,
+                toolbar:true,
+                totalRow:true,
+                page : true,
+                limit : 10,
+                cols : [
+                    [
+                        {"type": 'radio'},
+                        {field: 'userId', title: 'ID',  align: "center", hide: true},
+                        {field: 'image', title: '照片', align: 'center',hide:true},
+                        {field: 'username', title: '账号',align: "center", sort: true},
+                        {field: 'password', title: '密码', align: 'center', sort: true,templet:setPwd},
+                        {field: 'name', title: '别名', align: 'center', sort: true},
+                        {field: 'createTime', title: '创建时间', align: 'center', sort: true},
+                        {field: 'right', title: '操作',  toolbar: "#userBar"}
+                ]
+                ]
+            });
+
+            $("#refresh").on('click',function(){
+                location.reload();
+
+            });
+
+            function setPwd(data) {
+                var val = data.password;
+                return "<font color='green' size=2>"+val.substr(0,6)+"******"+val.substr(30)+"</font>";
+            }
+
+
+            //监听按钮操作
+            table.on('tool(userList)', function(obj) {
+                var data = obj.data;
+                var userId=data.userId;
+                //编辑用户
+                if(obj.event === 'editUser') {
+                    //先判断权限
+                    $.post('preUpdateUser',function(res){
+                        var status=res.code;
+                        if(status == 0){
+                            var con = '<br/><form class="layui-form" action="" method="post" >' +
+                                '<div class="layui-form-item">' +
+                                '<label class="layui-form-label">账号</label>' +
+                                '<div class="layui-input-inline">' +
+                                '<input type="text" name="username"   readonly="true" autocomplete="off"  class="layui-input" value='+data.username+'>' +
+                                '</div>' +
+                                '</div>' +
+
+                                '<div class="layui-form-item">' +
+                                '<label class="layui-form-label">别名</label>' +
+                                '<div class="layui-input-inline">' +
+                                '<input type="text" name="name"   autocomplete="off"  class="layui-input" value='+data.name+'>' +
+                                '<input type="hidden" name="userId"    autocomplete="off"  class="layui-input" value='+userId+'>' +
+                                '</div>' +
+                                '</div>' +
+
+                                '<div class="layui-form-item">' +
+                                '<div class="layui-input-block">' +
+                                '<button class="layui-btn" lay-submit="" lay-filter="editUser">确定</button>' +
+                                '</div>' +
+                                '</div>' +
+                                '</form>';
+                            layer.open({
+                                type: 1,
+                                title: '编辑用户',
+                                content: con,
+                                area: ['480px', '250px']
+                            });
+
+                        }else{
+                            layer.msg(res.msg, {icon: 5});
+                        }
+
+                    })
+                }
+                //删除用户
+                if(obj.event == 'delUser'){
+                    //layer.msg("删除用户信息");
+                    //权限判断是否满足
+                    $.post('preDelUser',data.field,function(res){
+                        var status=res.code;
+                        if(status == 0){
+                            layer.confirm('您确定要删除账号 '+data.username+'吗？', {
+                                btn: ['确定','取消'] //按钮
+                            }, function(){
+
+                                $.post('delUser',{userId:userId},function(res){
+                                    var status=res.code;
+                                    if(status == 0){
+                                        layer.msg(res.msg, {icon: 6,time:1000},function () {
+                                            location.reload();
+                                        });
+                                    }else{
+                                        layer.msg(res.msg, {icon: 5});
+                                    }
+
+                                })
+                            });
+                        }else{
+                            layer.msg(res.msg, {icon: 5});
+                        }
+
+                    })
+
+                }
+                //用户详情
+                if(obj.event == 'detail'){
+                    var username=data.username;
+                    var name=data.name;
+                    var image=data.image;
+                    var htm="<a href='"+ image +"' target='_Blank'> <image src='" + image + "' width='120px' height='120px'/ ></a>";
+
+                    var con = '<br/><form class="layui-form" action="" method="post">' +
+                        '<div class="layui-form-item">'+
+                        '<div class="layui-inline">'+
+                        '<label class="layui-form-label">账号</label>'+
+                        '<div class="layui-input-inline">'+
+                        '<input type="text" lay-verify="title" autocomplete="off"  class="layui-input" readonly="true" value='+username+'>'+
+                        '</div>'+
+                        '</div>'+
+
+                        '<div class="layui-inline">'+
+                        '<label class="layui-form-label">别名</label>'+
+                        '<div class="layui-input-inline">'+
+                        '<input type="text"  lay-verify="title" autocomplete="off"  class="layui-input" readonly="true" value='+name+'>'+
+                        '</div>'+
+                        '</div>'+
+
+                        '</div>'+
+
+
+                        '<div class="layui-form-item layui-form-text">'+
+                        '<label class="layui-form-label">照片</label>'+
+                        ' <div class="layui-input-block">'+htm+'</div>'+
+                        '</div>'+
+
+                        '</form>';
+
+                    layer.open({
+                        type: 1,
+                        title: '用户详情',
+                        content: con,
+                        area: ['750px', '320px']
+                    });
+
+                }
+            });
+            //编辑用户提交
+            form.on('submit(editUser)', function(data){
+                $.post('updateUser',data.field,function(res){
+                    var status=res.code;
+                    if(status == 0){
+                        layer.msg(res.msg, {icon: 6,time:1000},function () {
+                            location.reload();
+                        });
+                    }else{
+                        layer.msg(res.msg, {icon: 5});
+                    }
+
+                })
+                return false;
+            });
+
+
+            //添加用户
+            $("#addUser").on('click',function(){
+                //layer.msg("添加用户信息");
+                //权限判断
+                $.post('preAddUser',function(res){
+                    var status=res.code;
+                    if(status == 0){
+                        var con = '<br/><form class="layui-form" action="" method="post" >' +
+                            '<div class="layui-form-item">' +
+                            '<label class="layui-form-label">账号</label>' +
+                            '<div class="layui-input-inline">' +
+                            '<input type="text" name="username"  placeholder="请输入账号" lay-verify="account" autocomplete="off"  class="layui-input" >' +
+                            '</div>' +
+                            '</div>' +
+
+                            '<div class="layui-form-item">' +
+                            '<label class="layui-form-label">密码</label>' +
+                            '<div class="layui-input-inline">' +
+                            '<input type="password" name="password"  placeholder="请输入密码"  lay-verify="pwd" autocomplete="off"  class="layui-input" >' +
+                            '</div>' +
+                            '</div>' +
+
+                            '<div class="layui-form-item">' +
+                            '<label class="layui-form-label">别名</label>' +
+                            '<div class="layui-input-inline">' +
+                            '<input type="text" name="name"   placeholder="请输入别名" autocomplete="off"  class="layui-input" >' +
+                            '</div>' +
+                            '</div>' +
+
+                            '<div class="layui-form-item">' +
+                            '<div class="layui-input-block">' +
+                            '<button class="layui-btn" lay-submit="" lay-filter="addUser">确定</button>' +
+                            '</div>' +
+                            '</div>' +
+                            '</form>';
+                        layer.open({
+                            type: 1,
+                            title: '添加用户',
+                            content: con,
+                            area: ['480px', '300px']
+                        });
+
+                    }else{
+                        layer.msg(res.msg, {icon: 5});
+                    }
+
+                })
+
+            });
+
+
+            //添加用户提交
+            form.on('submit(addUser)', function(data){
+                $.post('addUser',data.field,function(res){
+                    var status=res.code;
+                    if(status == 0){
+                        layer.msg(res.msg, {icon: 6,time:1000},function () {
+                            location.reload();
+                        });
+                    }else{
+                        layer.msg(res.msg, {icon: 5});
+                    }
+
+                })
+                return false;
+            });
+
+            //添加用户带照片
+            $("#addUserImg").on('click',function(){
+                //layer.alert("添加用户(附带照片)")
+                //location.href="addUserView";
+
+                $.post('preAddUserView',function(res){
+                    var status=res.code;
+                    if(status == 0){
+                        //layer.msg(res.msg, {icon: 6,time:1000},function () {
+                           // location.reload();
+                        //});
+                        location.href="addUserView";
+                    }else{
+                        layer.msg(res.msg, {icon: 5});
+                    }
+
+                })
+            });
+
+
+            //提交参数格式校验
+            var regAccount = /^[a-zA-Z0-9_]{3,8}$/;
+            form.verify({
+                mac: function(value) {
+                    if(value.length != 12) {
+                        return 'mac格式有误';
+                    }
+                },
+                pwd:function (value) {
+                    if(value.length < 6){
+                        return '密码长度不能小于6';
+                    }
+                },
+                account:function (value) {
+                   if(!regAccount.test(value)){
+                       return '账号必须是英文,数字或下划线，长度在3到8';
+                   }
+                }
+            });
+
+
+        });
+
+</script>
+
+<script type="text/html" id="userBar">
+
+    <a class="layui-btn layui-btn-xs" lay-event="editUser">
+        <i class="layui-icon"> &#xe642;</i>编辑
+    </a>
+
+    <a class="layui-btn layui-btn-xs" lay-event="delUser">
+        <i class="layui-icon"> &#xe640;</i>删除
+    </a>
+
+    <a class="layui-btn layui-btn-xs" lay-event="detail">
+        <i class="layui-icon"> &#xe641;</i>详情
+    </a>
+</script>
+</body>
+
+</html>

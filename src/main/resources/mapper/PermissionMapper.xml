@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyakun.boot.wykblog.mapper.PermissionMapper">
+
+    <resultMap id="BaseResultMap" type="com.wangyakun.boot.wykblog.model.PermissionModel" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="p_name" property="pName" jdbcType="VARCHAR" />
+        <result column="p_url" property="pUrl" jdbcType="VARCHAR" />
+        <result column="p_type" property="pType" jdbcType="VARCHAR" />
+        <result column="p_per" property="per" jdbcType="VARCHAR" />
+        <result column="pid" property="pid" jdbcType="INTEGER" />
+        <result column="create_time" property="createTime" jdbcType="DATE" />
+    </resultMap>
+
+    <select id="getPermissionListByRoleId" resultMap="BaseResultMap">
+    select bp.* from blog_role br join blog_role_permission brp on br.id=brp.role_id
+    join blog_permission bp on brp.p_id=bp.id
+    where br.id=#{roleId}
+    </select>
+</mapper>
