@@ -5,6 +5,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wangyakun.boot.wykblog.constant.RespEnum;
@@ -17,12 +20,15 @@ import com.wangyakun.boot.wykblog.model.UserModel;
 import com.wangyakun.boot.wykblog.model.dto.UserDTO;
 import com.wangyakun.boot.wykblog.model.vo.UserVO;
 import com.wangyakun.boot.wykblog.service.UserService;
+import com.wangyakun.boot.wykblog.util.JsonUtils;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
 import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
 import org.apache.log4j.Logger;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
@@ -44,6 +50,11 @@ public class UserServiceImpl implements UserService {
 
     public final Logger log=Logger.getLogger(UserServiceImpl.class);
 
+    //redis 缓存
+    @Autowired
+    private RedisTemplate<String,String> redisTemplate;
+
+
     @Autowired
     private UserMapper userMapper;
 
@@ -56,20 +67,49 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseWrapper getAllUserList() {
         ResponseWrapper wrapper;
-        List<UserModel> list=userMapper.selectAll();
-        if(CollUtil.isNotEmpty(list)){
+        //增加redis 缓存实现
+        String key="allUser";
+        ValueOperations<String,String> ops=redisTemplate.opsForValue();
+        boolean flag=redisTemplate.hasKey(key);
+        if(flag){
+            log.info("缓存中获取用户数据==============");
+            Object object=ops.get(key);
+            //List<UserVO> vos= JsonUtils.json2Object(object.toString(),null);
             List<UserVO> vos=new ArrayList<>();
-            for(UserModel model:list){
+            JSONArray array= JSONUtil.parseArray(object.toString());
+            for(int i=0;i<array.size();i++){
+                JSONObject temp=array.getJSONObject(i);
                 UserVO vo=new UserVO();
-                vo.setName(model.getName());
-                vo.setUsername(model.getUsername());
-                vo.setPassword(model.getPassword());
-                vo.setCreateTime(DateUtil.format(model.getCreateTime(),"yyyy-MM-dd HH:mm:ss"));
+                vo.setUserId(temp.getInt("userId"));
+                vo.setUsername(temp.getStr("username"));
+                vo.setPassword(temp.getStr("password"));
+                vo.setImage(temp.getStr("image"));
+                vo.setName(temp.getStr("name"));
+                vo.setCreateTime(temp.getStr("createTime"));
                 vos.add(vo);
             }
-            wrapper= ResponseWrapperMapper.successByData(vos);
-        }else{
-           wrapper=ResponseWrapperMapper.errorEnum(RespEnum.SYSTEM_HAS_NO_DATA);
+            wrapper = ResponseWrapperMapper.successByData(vos);
+        }else {
+            log.info("数据库获取用户数据==============");
+            List<UserModel> list = userMapper.selectAll();
+            if (CollUtil.isNotEmpty(list)) {
+                List<UserVO> vos = new ArrayList<>();
+                for (UserModel model : list) {
+                    UserVO vo = new UserVO();
+                    vo.setName(model.getName());
+                    vo.setUsername(model.getUsername());
+                    vo.setPassword(model.getPassword());
+                    vo.setCreateTime(DateUtil.format(model.getCreateTime(),
+                            "yyyy-MM-dd HH:mm:ss"));
+                    vo.setImage(model.getImage());
+                    vos.add(vo);
+                }
+                wrapper = ResponseWrapperMapper.successByData(vos);
+                ops.set(key,JsonUtils.object2Json(vos));
+
+            } else {
+                wrapper = ResponseWrapperMapper.errorEnum(RespEnum.SYSTEM_HAS_NO_DATA);
+            }
         }
            return wrapper;
     }

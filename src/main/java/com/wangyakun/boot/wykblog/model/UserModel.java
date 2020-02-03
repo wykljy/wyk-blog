@@ -2,6 +2,7 @@ package com.wangyakun.boot.wykblog.model;
 
 import lombok.Data;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,8 @@ import java.util.Date;
  **/
 @Table(name = "blog_user")
 @Data
-public class UserModel {
+public class UserModel implements Serializable {
+    private static final long serialVersionUID=1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "JDBC")

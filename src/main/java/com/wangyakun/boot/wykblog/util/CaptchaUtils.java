@@ -2,6 +2,7 @@ package com.wangyakun.boot.wykblog.util;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.core.date.DateUtil;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -33,8 +34,10 @@ public class CaptchaUtils {
     }
 
     public static void main(String[] args) {
-        CaptchaUtils utils=new CaptchaUtils();
-        utils.saveCaptcha();
+        //CaptchaUtils utils=new CaptchaUtils();
+        //utils.saveCaptcha();
+        String time="2020-03-01 12:00:00";
+        System.out.println(DateUtil.parse(time).getTime()/1000);
     }
 
 

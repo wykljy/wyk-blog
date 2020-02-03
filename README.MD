@@ -17,3 +17,14 @@
  * 列表数据的获取加入了分页，也是采用了pagehelper的依赖实现
  * 其他功能有待完善
  
+ ## redis 配置说明
+ * spring.redis.database=0  Redis 数据库索引,默认为0
+ * spring.redis.host=localhost Redis 服务器地址
+ * spring.redis.port=6379  Redis 服务器连接端口
+ * spring.redis.password=123456 Redis 服务器连接密码,默认为空
+ * spring.redis.lettuce.pool.max-active=8 连接池最大连接数
+ * spring.redis.lettuce.pool.max-wait=-1 连接池最大阻塞等待时间,-1表示没有
+ * spring.redis.lettuce.pool.max-idle=8 连接池中的最大空闲连接
+ * spring.redis.lettuce.pool.min-idle=0 连接池中最小空闲连接
+ * spring.redis.timeout=10000 连接超时时间(毫秒)
+ 

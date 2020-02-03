@@ -69,6 +69,8 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/test/**","anon");
         //验证码忽略不计
         filterChainDefinitionMap.put("/captcha/**","anon");
+        //redis 测试忽略不计
+        filterChainDefinitionMap.put("/redis/**","anon");
         //<!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
         filterChainDefinitionMap.put("/**", "authc");
 
