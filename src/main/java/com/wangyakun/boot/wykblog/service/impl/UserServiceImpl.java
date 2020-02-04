@@ -10,6 +10,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.wangyakun.boot.wykblog.config.redis.RedisUtil;
 import com.wangyakun.boot.wykblog.constant.RespEnum;
 import com.wangyakun.boot.wykblog.mapper.PermissionMapper;
 import com.wangyakun.boot.wykblog.mapper.RoleMapper;
@@ -53,6 +54,9 @@ public class UserServiceImpl implements UserService {
     //redis 缓存
     @Autowired
     private RedisTemplate<String,String> redisTemplate;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
 
     @Autowired
@@ -166,6 +170,33 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectOneByExample(example);
     }
 
+    private static int ExpireTime = 60;
+
+    @Override
+    public ResponseWrapper getUserByRedis(String username) {
+        ResponseWrapper wrapper;
+        Object object=redisUtil.get(username);
+        if(object !=null){
+            log.info("从缓存中获取数据====================");
+            wrapper=ResponseWrapperMapper.success();
+            wrapper.setData(object);
+        }else{
+            log.info("从数据库获取数据=====================");
+            UserModel model=this.getUserByUsername(username);
+            UserVO vo=new UserVO();
+            vo.setUserId(model.getId());
+            vo.setUsername(model.getUsername());
+            vo.setPassword(model.getPassword());
+            vo.setName(model.getName());
+            vo.setImage(model.getImage());
+            vo.setCreateTime(DateUtil.format(model.getCreateTime(),"yyyy-MM-dd HH:mm:ss"));
+            redisUtil.set(username,vo,ExpireTime);
+            wrapper=ResponseWrapperMapper.success();
+            wrapper.setData(vo);
+        }
+        return wrapper;
+    }
+
     @Override
     public ResponseWrapper updateUser(UserDTO userDTO) {
         UserModel model=userMapper.selectByPrimaryKey(userDTO.getUserId());
@@ -214,6 +245,16 @@ public class UserServiceImpl implements UserService {
         model.setCreateTime(new Date());
         model.setSalt(salt);
         userMapper.insert(model);
+
+        //缓存数据
+        UserVO vo=new UserVO();
+        vo.setUserId(model.getId());
+        vo.setUsername(model.getUsername());
+        vo.setPassword(model.getPassword());
+        vo.setName(model.getName());
+        vo.setCreateTime(DateUtil.format(model.getCreateTime(),"yyyy-MM-dd HH:mm:ss"));
+        redisUtil.set(userDTO.getUsername(),vo,ExpireTime);
+        log.info("数据缓存到redis==============");
         return ResponseWrapperMapper.success();
     }
 

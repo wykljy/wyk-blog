@@ -15,6 +15,8 @@ public interface UserService {
 
     UserModel getUserByUsername(String username);
 
+    ResponseWrapper getUserByRedis(String username);
+
     ResponseWrapper updateUser(UserDTO userDTO);
 
     List<RoleModel> getRoleListByUser(UserModel userModel);
@@ -22,6 +24,8 @@ public interface UserService {
     List<PermissionModel> getPermissionListByRoleId(int roleId);
 
     ResponseWrapper saveUser(UserDTO userDTO);
+
+
 
     ResponseWrapper addUserImg(String username,String name,String pwd,String img);
 
