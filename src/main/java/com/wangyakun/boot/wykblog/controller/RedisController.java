@@ -53,6 +53,7 @@ public class RedisController {
         vo.setUserId(1);
         vo.setImage("www.baidu.com");
         redisUtil.set(key, JsonUtils.object2Json(vo));
+        log.info("redis 缓存数据写入==============");
         return ResponseWrapperMapper.success();
     }
 
@@ -63,6 +64,7 @@ public class RedisController {
         ResponseWrapper wrapper=null;
         boolean b=redisUtil.hasKey(key);
         if(b){
+            log.info("获取redis 缓存数据==============");
             Object object=redisUtil.get(key);
             UserVO vo=JsonUtils.json2Object(object.toString(),UserVO.class);
             wrapper=ResponseWrapperMapper.success();
@@ -79,6 +81,7 @@ public class RedisController {
         ResponseWrapper wrapper=null;
         boolean b=redisUtil.hasKey(key);
         if(b){
+            log.info("删除redis缓存=============");
            redisUtil.del(key);
            wrapper=ResponseWrapperMapper.success();
        }else{
