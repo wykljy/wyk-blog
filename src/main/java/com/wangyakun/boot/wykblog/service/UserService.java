@@ -25,11 +25,11 @@ public interface UserService {
 
     ResponseWrapper saveUser(UserDTO userDTO);
 
-
-
     ResponseWrapper addUserImg(String username,String name,String pwd,String img);
 
     ResponseWrapper delUser(int userId);
+
+    ResponseWrapper getIndexPageData();
 
 
 }

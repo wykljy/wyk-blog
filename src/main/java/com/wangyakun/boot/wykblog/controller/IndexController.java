@@ -2,12 +2,14 @@ package com.wangyakun.boot.wykblog.controller;
 
 import com.wangyakun.boot.wykblog.constant.RespEnum;
 import com.wangyakun.boot.wykblog.model.vo.IndexPageVO;
+import com.wangyakun.boot.wykblog.service.UserService;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
 import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
 import org.apache.log4j.Logger;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class IndexController {
     public final Logger log = Logger.getLogger(IndexController.class);
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping("/index")
     public String index() {
@@ -125,11 +130,7 @@ public class IndexController {
     @RequestMapping("getIndexPageData")
     @ResponseBody
     public ResponseWrapper getIndexPageData(){
-        IndexPageVO vo=new IndexPageVO();
-        vo.setArticleCount(87);
-        vo.setVipCount(298);
-        vo.setCommentCount(230);
-        return ResponseWrapperMapper.successByData(vo);
+        return userService.getIndexPageData();
     }
 
 

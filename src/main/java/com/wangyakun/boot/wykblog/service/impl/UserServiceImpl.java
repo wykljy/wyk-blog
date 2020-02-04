@@ -19,6 +19,7 @@ import com.wangyakun.boot.wykblog.model.PermissionModel;
 import com.wangyakun.boot.wykblog.model.RoleModel;
 import com.wangyakun.boot.wykblog.model.UserModel;
 import com.wangyakun.boot.wykblog.model.dto.UserDTO;
+import com.wangyakun.boot.wykblog.model.vo.IndexPageVO;
 import com.wangyakun.boot.wykblog.model.vo.UserVO;
 import com.wangyakun.boot.wykblog.service.UserService;
 import com.wangyakun.boot.wykblog.util.JsonUtils;
@@ -175,10 +176,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseWrapper getUserByRedis(String username) {
         ResponseWrapper wrapper;
-        Object object=redisUtil.get(username);
-        if(object !=null){
+        boolean flag=redisUtil.hasKey(username);
+        if(flag){
             log.info("从缓存中获取数据====================");
             wrapper=ResponseWrapperMapper.success();
+            Object object=redisUtil.get(username);
             wrapper.setData(object);
         }else{
             log.info("从数据库获取数据=====================");
@@ -253,7 +255,10 @@ public class UserServiceImpl implements UserService {
         vo.setPassword(model.getPassword());
         vo.setName(model.getName());
         vo.setCreateTime(DateUtil.format(model.getCreateTime(),"yyyy-MM-dd HH:mm:ss"));
-        redisUtil.set(userDTO.getUsername(),vo,ExpireTime);
+        //缓存序列化对象
+        //redisUtil.set(userDTO.getUsername(),vo,ExpireTime);
+        //缓存json
+        redisUtil.set(userDTO.getUsername(),JsonUtils.object2Json(vo),ExpireTime);
         log.info("数据缓存到redis==============");
         return ResponseWrapperMapper.success();
     }
@@ -287,6 +292,33 @@ public class UserServiceImpl implements UserService {
     public ResponseWrapper delUser(int userId) {
        userMapper.deleteByPrimaryKey(userId);
        return ResponseWrapperMapper.success();
+    }
+
+    @Override
+    public ResponseWrapper getIndexPageData() {
+        ResponseWrapper wrapper=null;
+        boolean b=redisUtil.hasKey("indexData");
+        if(b){
+            log.info("从缓存中获取===============");
+            Object object=redisUtil.get("indexData");
+            IndexPageVO vo=JsonUtils.conveterObject(object,IndexPageVO.class);
+            wrapper=ResponseWrapperMapper.success();
+            //wrapper.setData(object);
+            wrapper.setData(vo);
+        }else{
+            log.info("从后台获取===================");
+            IndexPageVO vo=new IndexPageVO();
+            vo.setArticleCount(87);
+            vo.setVipCount(298);
+            vo.setCommentCount(230);
+            //序列化对象存储
+            //redisUtil.set("indexData",vo,ExpireTime);
+            //json方式存储
+            redisUtil.set("indexData",JsonUtils.object2Json(vo),ExpireTime);
+            wrapper=ResponseWrapperMapper.success();
+            wrapper.setData(vo);
+        }
+        return wrapper;
     }
 
 
