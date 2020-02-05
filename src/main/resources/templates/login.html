@@ -113,8 +113,10 @@
         var imgSrc = $("#captchaImg");
         var src = imgSrc.attr("src");
         imgSrc.attr("src", src+"?t="+new Date().getTime());
+        ///验证码内容置空
+        $("#verity").val("");
     }
-</script>
+</script>val
 </body>
 
 </html>
