@@ -38,7 +38,6 @@ public class UserController {
     @RequestMapping("/userList")
     @RequiresPermissions("user:query")
     public String  userList(){
-        log.info("userList================");
         return "user/user";
     }
 

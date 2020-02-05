@@ -125,6 +125,8 @@ public class UserServiceImpl implements UserService {
         ResponseWrapper wrapper;
         PageHelper.startPage(userDTO.getPage(),userDTO.getLimit());
         Example example=new Example(UserModel.class);
+        //降序排列
+        example.orderBy("id").desc();
         List<UserModel> list=userMapper.selectByExample(example);
         if(CollUtil.isNotEmpty(list)) {
             PageInfo<UserModel> page = new PageInfo<>(list);
