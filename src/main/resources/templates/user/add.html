@@ -44,6 +44,14 @@
         </div>
     </div>
 
+    <div class="layui-form-item">
+        <label class="layui-form-label">所属角色</label>
+        <div class="layui-input-inline">
+            <select name="roleId" lay-filter="" id="roleId">
+            </select>
+        </div>
+    </div>
+
 
 
     <div class="layui-form-item">
@@ -64,7 +72,7 @@
 
     <div class="layui-form-item">
         <div class="layui-input-block">
-            <button class="layui-btn" lay-submit="" lay-filter="addOperator">确定</button>
+            <button class="layui-btn" lay-submit="" lay-filter="addUserImg">确定</button>
         </div>
     </div>
 </form>
@@ -82,6 +90,36 @@
             var element=layui.element;
 
             //初始化数据
+            $.ajax({    //获取角色列表
+                type : "post",
+                url : 'queryRoleList',
+                dataType : "json",
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                data: {
+                    "page":1,
+                    "limit":10
+                },
+                async: false,
+                cache: false,
+                success:function(data) {   //成功
+
+                    if(data.code==0){
+                        $.each(data.data,function(i,item){
+                            $("#roleId").append( "<option value="+item.roleId+">"+item.roleName+"</option>" );
+                        });
+                    }else{
+                        layer.msg("您尚未添加角色信息");
+                    }
+                },
+                error:function(data){
+
+                    alert("error");
+                }
+            });
+
+
+
+            /*
             var url = window.location.href;
             //获取参数
             if(url.indexOf("?") != -1) {
@@ -91,7 +129,10 @@
                     userId = userId.split("=");
                     $("#username").val(userId[1]);
                 })
-            }
+            }*/
+
+
+
 
             var uploadInst = upload.render({
                 elem: '#headImg'
@@ -159,8 +200,8 @@
                 }
             });
 
-            //添加操作员
-            form.on('submit(addOperator)', function(data){
+            //添加用户
+            form.on('submit(addUserImg)', function(data){
                 var index= layer.load(1);
                 $.post('addUserImg',data.field,function(res){
                     layer.close(index);

@@ -15,9 +15,11 @@ import com.wangyakun.boot.wykblog.constant.RespEnum;
 import com.wangyakun.boot.wykblog.mapper.PermissionMapper;
 import com.wangyakun.boot.wykblog.mapper.RoleMapper;
 import com.wangyakun.boot.wykblog.mapper.UserMapper;
+import com.wangyakun.boot.wykblog.mapper.UserRoleMapper;
 import com.wangyakun.boot.wykblog.model.PermissionModel;
 import com.wangyakun.boot.wykblog.model.RoleModel;
 import com.wangyakun.boot.wykblog.model.UserModel;
+import com.wangyakun.boot.wykblog.model.UserRoleModel;
 import com.wangyakun.boot.wykblog.model.dto.UserDTO;
 import com.wangyakun.boot.wykblog.model.vo.IndexPageVO;
 import com.wangyakun.boot.wykblog.model.vo.UserVO;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
@@ -65,6 +68,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @Autowired
     private PermissionMapper permissionMapper;
@@ -265,8 +271,11 @@ public class UserServiceImpl implements UserService {
         return ResponseWrapperMapper.success();
     }
 
+
+    //需要考虑角色
     @Override
-    public ResponseWrapper addUserImg(String username, String name, String pwd, String img) {
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseWrapper addUserImg(String username, String name, String pwd, String img,int roleId) {
         ResponseWrapper wrapper=null;
         //需要判断账户是否存在
         Example example=new Example(UserModel.class);
@@ -285,6 +294,10 @@ public class UserServiceImpl implements UserService {
             model.setSalt(salt);
             model.setImage(img);
             userMapper.insert(model);
+            UserRoleModel userRoleModel=new UserRoleModel();
+            userRoleModel.setRoleId(roleId);
+            userRoleModel.setUserId(model.getId());
+            userRoleMapper.insert(userRoleModel);
             wrapper=ResponseWrapperMapper.success();
         }
         return wrapper;
@@ -303,7 +316,7 @@ public class UserServiceImpl implements UserService {
         if(b){
             log.info("从缓存中获取===============");
             Object object=redisUtil.get("indexData");
-            IndexPageVO vo=JsonUtils.conveterObject(object,IndexPageVO.class);
+            IndexPageVO vo=JsonUtils.json2Object(object.toString(),IndexPageVO.class);
             wrapper=ResponseWrapperMapper.success();
             //wrapper.setData(object);
             wrapper.setData(vo);

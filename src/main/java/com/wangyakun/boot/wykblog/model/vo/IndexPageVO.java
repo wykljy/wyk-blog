@@ -1,4 +1,5 @@
 package com.wangyakun.boot.wykblog.model.vo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import java.io.Serializable;
 /**
@@ -9,6 +10,8 @@ import java.io.Serializable;
  * @Version 1.0
  **/
 @Data
+//忽略不存在的字段
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IndexPageVO implements Serializable {
     private static final long serialVersionUID=1L;
 

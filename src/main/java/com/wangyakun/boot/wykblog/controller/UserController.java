@@ -3,7 +3,9 @@ package com.wangyakun.boot.wykblog.controller;
 import com.wangyakun.boot.wykblog.model.PermissionModel;
 import com.wangyakun.boot.wykblog.model.RoleModel;
 import com.wangyakun.boot.wykblog.model.UserModel;
+import com.wangyakun.boot.wykblog.model.dto.RoleDTO;
 import com.wangyakun.boot.wykblog.model.dto.UserDTO;
+import com.wangyakun.boot.wykblog.service.RoleService;
 import com.wangyakun.boot.wykblog.service.UserService;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
 import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
@@ -34,6 +36,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
     @RequestMapping("/userList")
     @RequiresPermissions("user:query")
@@ -159,12 +163,13 @@ public class UserController {
     @RequestMapping("/addUserImg")
     @ResponseBody
     public ResponseWrapper addUserImg(@RequestParam("username")String username,@RequestParam("password")String password,
-                                      @RequestParam("name")String name,@RequestParam("userImage")String userImage){
+                                      @RequestParam("name")String name,@RequestParam("userImage")String userImage,
+                                      @RequestParam("roleId")int roleId){
         log.info("账号:"+username);
         log.info("密码:"+password);
         log.info("别名:"+name);
         log.info("照片:"+userImage);
-      return userService.addUserImg(username,name,password,userImage);
+      return userService.addUserImg(username,name,password,userImage,roleId);
     }
 
 
@@ -195,6 +200,14 @@ public class UserController {
         return ResponseWrapperMapper.successByData(list);
     }
 
+    @RequestMapping("/queryRoleList")
+    @ResponseBody
+    public ResponseWrapper queryRoleList(@RequestParam("page")int page,@RequestParam("limit")int limit){
+        RoleDTO roleDTO=new RoleDTO();
+        roleDTO.setPage(page);
+        roleDTO.setLimit(limit);
+        return roleService.queryRoleList(roleDTO);
+    }
 
 
 }
