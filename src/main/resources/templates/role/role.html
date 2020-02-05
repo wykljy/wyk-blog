@@ -109,7 +109,7 @@
                                 '</form>';
                             layer.open({
                                 type: 1,
-                                title: '编辑用户',
+                                title: '编辑角色',
                                 content: con,
                                 area: ['480px', '250px']
                             });
@@ -121,17 +121,16 @@
                     })
                 }
                 //删除用户
-                if(obj.event == 'delUser'){
-                    //layer.msg("删除用户信息");
+                if(obj.event == 'delRole'){
                     //权限判断是否满足
-                    $.post('preDelUser',data.field,function(res){
+                    $.post('preDelRole',data.field,function(res){
                         var status=res.code;
                         if(status == 0){
-                            layer.confirm('您确定要删除账号 '+data.username+'吗？', {
+                            layer.confirm('您确定要删除角色 '+data.roleName+'吗？', {
                                 btn: ['确定','取消'] //按钮
                             }, function(){
 
-                                $.post('delUser',{userId:userId},function(res){
+                                $.post('delRole',{userId:userId},function(res){
                                     var status=res.code;
                                     if(status == 0){
                                         layer.msg(res.msg, {icon: 6,time:1000},function () {
@@ -185,7 +184,7 @@
 
                     layer.open({
                         type: 1,
-                        title: '用户详情',
+                        title: '角色详情',
                         content: con,
                         area: ['750px', '320px']
                     });

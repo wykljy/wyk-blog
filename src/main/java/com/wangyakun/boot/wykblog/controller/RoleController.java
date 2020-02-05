@@ -2,6 +2,7 @@ package com.wangyakun.boot.wykblog.controller;
 import com.wangyakun.boot.wykblog.model.dto.RoleDTO;
 import com.wangyakun.boot.wykblog.service.RoleService;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
+import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,4 +41,30 @@ public class RoleController {
         roleDTO.setPage(page);
        return roleService.queryRoleList(roleDTO);
     }
+
+    @RequestMapping("/preUpdateRole")
+    @ResponseBody
+    @RequiresPermissions("role:update")
+    public ResponseWrapper preUpdateRole()throws  Exception{
+        return ResponseWrapperMapper.success();
+    }
+
+
+    @RequestMapping("/preDelRole")
+    @RequiresPermissions("role:del")
+    @ResponseBody
+    public ResponseWrapper preDelRole() throws  Exception{
+        return ResponseWrapperMapper.success();
+    }
+
+
+    //异常捕获，权限不足判断
+    @RequestMapping("/preAddRole")
+    @ResponseBody
+    @RequiresPermissions("role:add")
+    public ResponseWrapper preAddRole()throws  Exception{
+        return ResponseWrapperMapper.success();
+    }
+
+
 }
