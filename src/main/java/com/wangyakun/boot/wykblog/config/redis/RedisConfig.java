@@ -10,10 +10,9 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
 /**
  * @ClassName RedisConfig
- * @Description TODO
+ * @Description
  * @Author wangyakun
  * @Date 2020/2/2 23:12
  * @Version 1.0

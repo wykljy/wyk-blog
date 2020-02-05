@@ -1,9 +1,6 @@
 package com.wangyakun.boot.wykblog.model.vo;
-
 import lombok.Data;
-
 import java.io.Serializable;
-
 /**
  * @ClassName IndexPageVO
  * @Description TODO

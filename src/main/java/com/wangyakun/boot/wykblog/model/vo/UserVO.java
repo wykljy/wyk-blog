@@ -2,6 +2,8 @@ package com.wangyakun.boot.wykblog.model.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @ClassName UserVO
  * @Description TODO
@@ -10,7 +12,10 @@ import lombok.Data;
  * @Version 1.0
  **/
 @Data
-public class UserVO {
+public class UserVO implements Serializable {
+
+     private static final long serialVersionUID=1L;
+
      private int userId;
 
      private String name;

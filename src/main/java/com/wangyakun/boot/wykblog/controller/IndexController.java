@@ -1,7 +1,5 @@
 package com.wangyakun.boot.wykblog.controller;
-
 import com.wangyakun.boot.wykblog.constant.RespEnum;
-import com.wangyakun.boot.wykblog.model.vo.IndexPageVO;
 import com.wangyakun.boot.wykblog.service.UserService;
 import com.wangyakun.boot.wykblog.util.ResponseWrapper;
 import com.wangyakun.boot.wykblog.util.ResponseWrapperMapper;
@@ -15,10 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import javax.servlet.http.HttpServletRequest;
-
-
 /**
  * @ClassName IndexController
  * @Description 引导页
