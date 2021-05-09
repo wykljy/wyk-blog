@@ -40,7 +40,7 @@ public class TestController {
         LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100);
         lineCaptcha.write(response.getOutputStream());
         log.info(lineCaptcha.getCode());
-        log.info("master test");
+        log.info("master test ");
         return ResponseWrapperMapper.success();
     }
 
